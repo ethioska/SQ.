@@ -8,85 +8,146 @@
     body {
       margin: 0;
       font-family: "Poppins", sans-serif;
-      background: linear-gradient(180deg, #0b0f2a 0%, #1a0034 100%);
+      background: radial-gradient(circle at top, #0a0025, #0b012a, #1a0034);
       color: white;
-      text-align: center;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      text-align: center;
     }
 
-    .card {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 25px;
-      border-radius: 20px;
+    .container {
+      margin-top: 80px;
       width: 90%;
       max-width: 400px;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 20px;
       box-shadow: 0 0 25px rgba(255, 0, 120, 0.3);
-      backdrop-filter: blur(8px);
-    }
-
-    .logo {
-      width: 70px;
-      margin-bottom: 15px;
+      padding: 25px;
     }
 
     h1 {
-      font-size: 28px;
-      margin-bottom: 10px;
+      font-size: 26px;
       color: #ff3d7f;
+      margin-bottom: 15px;
     }
 
     p {
-      font-size: 15px;
-      margin: 5px 0 20px 0;
-      color: #ddd;
+      font-size: 14px;
+      color: #bbb;
     }
 
-    .btn {
-      display: inline-block;
+    input {
+      width: 90%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      margin-top: 10px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    button {
       width: 95%;
-      padding: 14px;
-      background: linear-gradient(90deg, #ff3d7f, #ff006a);
+      margin-top: 15px;
+      padding: 12px;
+      background-color: #ff3d7f;
       border: none;
       border-radius: 10px;
       color: white;
       font-weight: bold;
       font-size: 16px;
-      text-decoration: none;
+      cursor: pointer;
       transition: 0.3s;
     }
 
-    .btn:hover {
-      transform: scale(1.05);
-      background: linear-gradient(90deg, #ff006a, #ff3d7f);
+    button:hover {
+      background-color: #ff006a;
+      box-shadow: 0 0 15px #ff3d7f;
+    }
+
+    .info-card {
+      margin-top: 25px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 15px;
+      text-align: left;
+      font-size: 14px;
     }
 
     .footer {
       margin-top: 20px;
       font-size: 12px;
-      color: #aaa;
+      color: #777;
+    }
+
+    a {
+      color: #ff3d7f;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/Rocket_emoji.png" class="logo" alt="Rocket" />
+  <div class="container">
     <h1>🚀 SQ BOOM</h1>
-    <p>Join our platform and earn <b>1 ETB</b> for every new user!</p>
-    <p><b>Coming Soon:</b> Dec 30, 2025</p>
+    <p>Join and earn 1 ETB for every user you invite!</p>
 
-    <a href="https://t.me/SQBOOMBOT" target="_blank" class="btn">🚀 Join on Telegram</a>
+    <input type="text" id="telegramId" placeholder="Enter your Telegram ID">
+    <input type="text" id="username" placeholder="Enter your Telegram username">
+
+    <button onclick="registerUser()">Register</button>
+    <button onclick="getUserInfo()">View My Info</button>
+
+    <div id="info" class="info-card" style="display:none;"></div>
 
     <div class="footer">
-      Official Communities: 
-      <a href="https://t.me/SQBOOM" style="color:#ff3d7f;text-decoration:none;">Main</a> | 
-      <a href="https://t.me/SQBOOM_COMMUNITY" style="color:#ff3d7f;text-decoration:none;">Community</a> | 
-      <a href="https://t.me/SQBOOMBOT" style="color:#ff3d7f;text-decoration:none;">Bot</a> | 
-      <a href="https://t.me/SQBOOM_SUPPORT" style="color:#ff3d7f;text-decoration:none;">Support</a>
+      SQ BOOM © 2025 | <a href="admin.html">Admin</a>
     </div>
   </div>
+
+  <script>
+    const scriptURL = "https://script.google.com/macros/s/AKfycbynTw8Ei1kI-zqm4r-kPxUNJT3aBxMqi8XNbz446L2P2q-w6UCOfFGl0qZtuzP6laQA/exec"; // <-- Replace with your Google Apps Script Web App URL
+
+    async function registerUser() {
+      const telegramId = document.getElementById("telegramId").value.trim();
+      const username = document.getElementById("username").value.trim();
+
+      if (!telegramId  !username) return alert("Please fill all fields.");
+
+      const res = await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "register", telegramId, username }),
+      });
+      const data = await res.json();
+      alert(data.message  "Registered successfully!");
+    }
+
+    async function getUserInfo() {
+      const telegramId = document.getElementById("telegramId").value.trim();
+      if (!telegramId) return alert("Enter your Telegram ID first.");
+
+      const res = await fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ action: "getInfo", telegramId }),
+      });
+      const data = await res.json();
+
+      const infoBox = document.getElementById("info");
+      if (data.ok) {
+        const u = data.userInfo;
+        infoBox.style.display = "block";
+        infoBox.innerHTML = 
+          <strong>👤 Username:</strong> @${u.username}<br>
+          <strong>💰 Balance:</strong> ${u.balance} ETB<br>
+          <strong>🎁 Bonus:</strong> ${u.bonus} ETB<br>
+          <strong>📈 Invites:</strong> ${u.invites}
+        ;
+      } else {
+        infoBox.style.display = "block";
+        infoBox.innerHTML = <strong>${data.message}</strong>;
+      }
+    }
+  </script>
 </body>
 </html>
