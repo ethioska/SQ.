@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SQ BOOM — Admin</title>
+<style>
+  :root{
+    --accent:#ff3d7f;
+    --accent-2:#ff006a;
+    --card-bg: rgba(255,255,255,0.06);
+    --glass: rgba(255,255,255,0.04);
+    --muted:#bfb9c9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Poppins,system-ui,Arial;background:radial-gradient(circle at top,#060016,#0b012a 40%,#14003a);color:#fff;min-height:100vh}
+  /* top-left admin label */
+  .admin-badge{position:fixed;left:14px;top:14px;background:linear-gradient(90deg,var(--accent),var(--accent-2));padding:8px 12px;border-radius:10px;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,.45);z-index:50}
+  main{max-width:1080px;margin:92px auto 60px;padding:20px}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:880px){.grid{grid-template-columns:360px 1fr}}
+  .card{background:var(--card-bg);padding:16px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+  h2{margin:0 0 8px 0;color:var(--accent)}
+  label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  input,textarea,select{width:100%;padding:10px;border-radius:10px;border:none;background:var(--glass);color:#fff;margin-top:8px;outline:none}
+  textarea{min-height:90px}
+  button{background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;color:white;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:700;margin-top:10px}
+  .muted{color:var(--muted);font-size:13px}
+  .row{display:flex;gap:10px}
+  .small{flex:1;padding:8px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--accent)}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
+  th,td{padding:8px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.03)}
+  .pill{display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:13px}
+  .danger{background:#ff2d5c}
+  .success{background:#16a34a}
+  .center{text-align:center}
+  .small-btn{padding:6px 8px;border-radius:8px;border:none;background:transparent;color:var(--accent);cursor:pointer}
+  .underline{color:var(--accent);text-decoration:underline}
+</style>
+</head>
+<body>
+  <div class="admin-badge">🛠 SQ BOOM Admin</div>
+
+  <main>
+    <div class="grid">
+      <!-- LEFT COLUMN: Login + Stats + Bonus + Quick actions -->
+      <div>
+        <!-- Login Card -->
+        <div class="card" id="loginCard">
+          <h2>Admin Login</h2>
+          <div class="muted">Enter admin password to unlock the dashboard.</div>
+          <input id="adminPassword" type="password" placeholder="Admin password" />
+          <button onclick="doLogin()">Unlock Dashboard</button>
+          <div id="loginMsg" class="muted" style="margin-top:10px"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="card hidden" id="statsCard" style="margin-top:14px">
+          <h2>Overview</h2>
+          <div class="muted">Live platform totals</div>
+          <div style="margin-top:12px">
+            <div><strong>👥 Total Users:</strong> <span id="totalUsers">—</span></div>
+            <div><strong>📈 Total Invites:</strong> <span id="totalInvites">—</span></div>
+            <div><strong>💸 Total Withdrawn:</strong> <span id="totalWithdraw">—</span> ETB</div>
+            <div><strong>🕒 Daily Claimers:</strong> <span id="dailyClaimers">—</span></div>
+            <div style="margin-top:10px" class="muted">Last refresh: <span id="lastRefresh">—</span></div>
+            <div style="margin-top:12px" class="row">
+              <button onclick="refreshStats()">Refresh</button>
+              <button class="small" onclick="loadTasks()">View Tasks</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bonus -->
+        <div class="card hidden" id="bonusCard" style="margin-top:14px">
+          <h2>Bonus Giveaway</h2>
+          <div class="muted">Add bonus ETB to all users</div>
+          <input id="bonusAmount" type="number" placeholder="Amount (ETB)" />
+          <div class="row">
+            <button onclick="giveBonusAll()">Give Bonus to All</button>
+            <button class="small" onclick="quickBonus(1)">+1 ETB</button>
+          </div>
+          <div id="bonusMsg" class="muted" style="margin-top:10px"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Task manager + Users list -->
+      <div>
+        <!-- Task Manager -->
+        <div class="card hidden" id="taskCard">
+          <h2>Task Manager</h2>
+          <div class="muted">Create tasks users can claim for ETB</div>
+          <label>Title</label>
+          <input id="taskTitle" placeholder="Task title (ex: Join our channel)" />
+          <label>Description</label>
+          <textarea id="taskDesc" placeholder="Short description for the task"></textarea>
+          <div class="row">
+            <input id="taskReward" placeholder="Reward (ETB)" type="number" />
+            <input id="taskMax" placeholder="Max claims (0 = unlimited)" type="number" />
+          </div>
+          <div class="row">
+            <button onclick="createTask()">Create Task</button>
+            <button class="small" onclick="loadTasks()">Refresh Tasks</button>
+          </div>
+          <div id="taskMsg" class="muted" style="margin-top:10px"></div>
+
+          <hr style="border:none;height:8px">
+          <h3 style="margin-top:10px">Active Tasks</h3>
+          <div id="tasksList" class="muted">No tasks loaded</div>
+        </div>
+
+        <!-- Users viewer -->
+        <div class="card hidden" id="usersCard" style="margin-top:14px">
+          <h2>User List</h2>
+          <div class="muted">Quick view of users (load from server)</div>
+          <div style="margin-top:8px" class="row">
+            <button onclick="loadUsers()">Load Users</button>
+            <button class="small" onclick="downloadCSV()">Export CSV</button>
+          </div>
+          <div id="usersWrap" style="margin-top:12px;max-height:340px;overflow:auto">
+            <table id="usersTable"><thead><tr><th>#</th><th>Username</th><th>ID</th><th>Invites</th><th>Balance</th></tr></thead><tbody></tbody></table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+<script>
+/*
+  Admin dashboard v2 frontend
+  - Replace SCRIPT_URL with your Apps Script Web App URL
+  - Uses actions:
+    - adminStats  (returns totals)
+    - adminBonusAll (give bonus to all)
+    - createTask (admin create task)
+    - listTasks (list active tasks)
+    - taskClaimersToday (count)
+  - If you add more admin endpoints, call them similarly.
+*/
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynTw8Ei1kI-zqm4r-kPxUNJT3aBxMqi8XNbz446L2P2q-w6UCOfFGl0qZtuzP6laQA/exec"; // <-- Replace with your Apps Script Web App URL
+let ADMIN_PASSWORD = ""; // stored after login (in-memory)
+let usersCache = []; // if backend supports exporting users later
+
+// Small helper to call API
+async function apiCall(body){
+  try{
+    const r = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(body)
+    });
+    return await r.json();
+  } catch(err){
+    return { ok:false, message: "Network error: " + err.message };
+  }
+}
+
+// Login
+async function doLogin(){
+  const pass = document.getElementById('adminPassword').value.trim();
+  if(!pass) return alert('Enter password');
+  // We'll validate by requesting adminStats with given password if backend expects it
+  const res = await apiCall({ action: "adminStats", password: pass });
+  if(res && res.message && res.message.totalUsers !== undefined){
+    ADMIN_PASSWORD = pass;
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('statsCard').classList.remove('hidden');
+    document.getElementById('bonusCard').classList.remove('hidden');
+    document.getElementById('taskCard').classList.remove('hidden');
+    document.getElementById('usersCard').classList.remove('hidden');
+    showAdminStats(res.message);
+  } else {
+    document.getElementById('loginMsg').innerText = '❌ Wrong password or API error';
+  }
+}
+
+function showAdminStats(s){
+  document.getElementById('totalUsers').innerText = s.totalUsers || 0;
+  document.getElementById('totalInvites').innerText = s.totalInvites || 0;
+  document.getElementById('totalWithdraw').innerText = s.totalWithdraw || 0;
+  document.getElementById('dailyClaimers').innerText = s.totalClaimersToday || 0;
+  document.getElementById('lastRefresh').innerText = new Date().toLocaleString();
+}
+
+// Refresh stats
+async function refreshStats(){
+  if(!ADMIN_PASSWORD) return alert('Not logged in');
+  const res = await apiCall({ action: "adminStats", password: ADMIN_PASSWORD });
+  if(res.ok) showAdminStats(res.message);
+  else alert('Failed to load stats');
+}
+
+// Give bonus to all
+async function giveBonusAll(){
+  if(!ADMIN_PASSWORD) return alert('Not logged in');
+  const amt = Number(document.getElementById('bonusAmount').value || 0);
+  if(!amt) return alert('Enter amount');
+  const res = await apiCall({ action: "adminBonusAll", password: ADMIN_PASSWORD, amount: amt });
+  document.getElementById('bonusMsg').innerText = res.message || JSON.stringify(res);
+  refreshStats();
+}
+
+function quickBonus(n){
+  document.getElementById('bonusAmount').value = n;
+  giveBonusAll();
+}
+
+// Create a task
+async function createTask(){
+  if(!ADMIN_PASSWORD) return alert('Not logged in');
+  const title = document.getElementById('taskTitle').value.trim();
+  const desc = document.getElementById('taskDesc').value.trim();
+  const reward = Number(document.getElementById('taskReward').value || 0);
+  const maxClaims = Number(document.getElementById('taskMax').value || 0);
+  if(!title || reward<=0) return alert('Enter title and reward');
+  const res = await apiCall({ action: "createTask", password: ADMIN_PASSWORD, title, description: desc, reward, maxClaims });
+  document.getElementById('taskMsg').innerText = res.message || JSON.stringify(res);
+  document.getElementById('taskTitle').value=''; document.getElementById('taskDesc').value=''; document.getElementById('taskReward').value=''; document.getElementById('taskMax').value='';
+  loadTasks();
+}
+
+// Load tasks list
+async function loadTasks(){
+  const res = await apiCall({ action: "listTasks" });
+  const box = document.getElementById('tasksList');
+  if(!res || !res.ok){
+    // older scripts might return an array directly
+    const tasks = Array.isArray(res) ? res : (res.message || []);
+    renderTasks(tasks);
+    return;
+  }
+  renderTasks(res.message || []);
+}
+
+function renderTasks(tasks){
+  const box = document.getElementById('tasksList');
+  if(!tasks || tasks.length===0){ box.innerHTML = '<div class="muted">No active tasks</div>'; return; }
+  let html = '<table style="width:100%"><thead><tr><th>Task</th><th>Reward</th><th>Max</th></tr></thead><tbody>';
+  tasks.forEach(t=>{
+    html += `<tr><td><strong>${escapeHtml(t.title)}</strong><br><small style="color:#ccc">${escapeHtml(t.description||'')}</small></td><td>${t.reward}</td><td>${t.maxClaims||0}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  box.innerHTML = html;
+}
+
+// Load users (if backend supports exportUsers later, otherwise note)
+async function loadUsers(){
+  // Try calling adminStats for counts first
+  const res = await apiCall({ action: "exportUsers", password: ADMIN_PASSWORD });
+  const table = document.querySelector('#usersTable tbody');
+  table.innerHTML = '';
+  if(!res || !res.ok){
+    // fallback: tell admin to add exportUsers action to backend
+    document.getElementById('usersWrap').innerHTML = '<div class="muted">User export not available from API. To enable, add an "exportUsers" action to backend that returns array of users.</div>';
+    return;
+  }
+  usersCache = res.message || [];
+  usersCache.forEach((u,i)=>{
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${i+1}</td><td>@${escapeHtml(u.username)}</td><td>${u.telegram_id}</td><td>${u.invites||0}</td><td>${u.balance||0}</td>`;
+    table.appendChild(row);
+  });
+}
+
+// Download CSV from current cache (if any)
+function downloadCSV(){
+  if(!usersCache || usersCache.length===0){ alert('No users loaded'); return; }
+  let csv = 'username,telegram_id,invites,balance\n';
+  usersCache.forEach(u => csv += `${u.username},${u.telegram_id},${u.invites||0},${u.balance||0}\n`);
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'sqboom_users.csv'; a.click(); URL.revokeObjectURL(url);
+}
+
+// Count claimers today (uses existing action if available)
+async function getClaimersToday(){
+  const res = await apiCall({ action: "taskClaimersToday" });
+  if(res && res.ok) document.getElementById('dailyClaimers').innerText = res.message || res;
+}
+
+// Small helper
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
+
+// auto refresh small bits
+setInterval(()=>{ if(ADMIN_PASSWORD) refreshStats(); }, 1000*60*2);
+</script>
+</body>
+</html>
