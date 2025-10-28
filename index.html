@@ -1,153 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SQ BOOM</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: "Poppins", sans-serif;
-      background: radial-gradient(circle at top, #0a0025, #0b012a, #1a0034);
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      text-align: center;
-    }
-
-    .container {
-      margin-top: 80px;
-      width: 90%;
-      max-width: 400px;
-      background: rgba(255, 255, 255, 0.07);
-      border-radius: 20px;
-      box-shadow: 0 0 25px rgba(255, 0, 120, 0.3);
-      padding: 25px;
-    }
-
-    h1 {
-      font-size: 26px;
-      color: #ff3d7f;
-      margin-bottom: 15px;
-    }
-
-    p {
-      font-size: 14px;
-      color: #bbb;
-    }
-
-    input {
-      width: 90%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      margin-top: 10px;
-      font-size: 15px;
-      outline: none;
-    }
-
-    button {
-      width: 95%;
-      margin-top: 15px;
-      padding: 12px;
-      background-color: #ff3d7f;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      background-color: #ff006a;
-      box-shadow: 0 0 15px #ff3d7f;
-    }
-
-    .info-card {
-      margin-top: 25px;
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 15px;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    .footer {
-      margin-top: 20px;
-      font-size: 12px;
-      color: #777;
-    }
-
-    a {
-      color: #ff3d7f;
-      text-decoration: none;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SQ BOOM</title>
+<style>
+body{
+  margin:0;font-family:"Poppins",sans-serif;
+  background:linear-gradient(180deg,#0b0f2a 0%,#1a0034 100%);
+  color:#fff;text-align:center;display:flex;
+  flex-direction:column;justify-content:center;
+  align-items:center;height:100vh;
+}
+.card{
+  background:rgba(255,255,255,0.1);
+  padding:25px;border-radius:20px;width:90%;
+  max-width:400px;box-shadow:0 0 25px rgba(255,0,120,0.3);
+}
+input,button{width:90%;padding:10px;border-radius:10px;border:none;margin:8px 0;}
+button{background:#ff3d7f;color:#fff;font-weight:bold;cursor:pointer;}
+button:hover{background:#ff006a;}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>🚀 SQ BOOM</h1>
-    <p>Join and earn 1 ETB for every user you invite!</p>
+<div class="card">
+<h1>SQ BOOM Registration</h1>
+<input id="tid" placeholder="Telegram ID">
+<input id="uname" placeholder="Username">
+<input id="fname" placeholder="Full Name">
+<button onclick="register()">Register</button>
+<button onclick="info()">My Info</button>
+<div id="result"></div>
+</div>
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbxyfXL5xIjEILkm12CuER_wW3PhWnsEY9wm_4jHid-ZRzQbhpm_OlDp1OT_K9xmeH7G/exec";
 
-    <input type="text" id="telegramId" placeholder="Enter your Telegram ID">
-    <input type="text" id="username" placeholder="Enter your Telegram username">
-
-    <button onclick="registerUser()">Register</button>
-    <button onclick="getUserInfo()">View My Info</button>
-
-    <div id="info" class="info-card" style="display:none;"></div>
-
-    <div class="footer">
-      SQ BOOM © 2025 | <a href="admin.html">Admin</a>
-    </div>
-  </div>
-
-  <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbynTw8Ei1kI-zqm4r-kPxUNJT3aBxMqi8XNbz446L2P2q-w6UCOfFGl0qZtuzP6laQA/exec"; // <-- Replace with your Google Apps Script Web App URL
-
-    async function registerUser() {
-      const telegramId = document.getElementById("telegramId").value.trim();
-      const username = document.getElementById("username").value.trim();
-
-      if (!telegramId  !username) return alert("Please fill all fields.");
-
-      const res = await fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify({ action: "register", telegramId, username }),
-      });
-      const data = await res.json();
-      alert(data.message  "Registered successfully!");
-    }
-
-    async function getUserInfo() {
-      const telegramId = document.getElementById("telegramId").value.trim();
-      if (!telegramId) return alert("Enter your Telegram ID first.");
-
-      const res = await fetch(scriptURL, {
-        method: "POST",
-        body: JSON.stringify({ action: "getInfo", telegramId }),
-      });
-      const data = await res.json();
-
-      const infoBox = document.getElementById("info");
-      if (data.ok) {
-        const u = data.userInfo;
-        infoBox.style.display = "block";
-        infoBox.innerHTML = 
-          <strong>👤 Username:</strong> @${u.username}<br>
-          <strong>💰 Balance:</strong> ${u.balance} ETB<br>
-          <strong>🎁 Bonus:</strong> ${u.bonus} ETB<br>
-          <strong>📈 Invites:</strong> ${u.invites}
-        ;
-      } else {
-        infoBox.style.display = "block";
-        infoBox.innerHTML = <strong>${data.message}</strong>;
-      }
-    }
-  </script>
+async function register(){
+  const d={action:"registerUser",
+           telegram_id:tid.value,username:uname.value,full_name:fname.value};
+  const r=await fetch(scriptURL,{method:"POST",body:JSON.stringify(d)});
+  const j=await r.json();result.innerText=j.ok?"✅ Registered":"❌ Error";
+}
+async function info(){
+  const d={action:"getUserInfo",telegram_id:tid.value};
+  const r=await fetch(scriptURL,{method:"POST",body:JSON.stringify(d)});
+  const j=await r.json();
+  result.innerHTML=j.ok?`👤 @${j.username}<br>💰 Balance ${j.balance} ETB<br>👥 Invites ${j.invites}`:"❌ User not found";
+}
+</script>
 </body>
 </html>
