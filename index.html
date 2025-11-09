@@ -1,52 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SQ BOOM</title>
-<style>
-body{
-  margin:0;font-family:"Poppins",sans-serif;
-  background:linear-gradient(180deg,#0b0f2a 0%,#1a0034 100%);
-  color:#fff;text-align:center;display:flex;
-  flex-direction:column;justify-content:center;
-  align-items:center;height:100vh;
-}
-.card{
-  background:rgba(255,255,255,0.1);
-  padding:25px;border-radius:20px;width:90%;
-  max-width:400px;box-shadow:0 0 25px rgba(255,0,120,0.3);
-}
-input,button{width:90%;padding:10px;border-radius:10px;border:none;margin:8px 0;}
-button{background:#ff3d7f;color:#fff;font-weight:bold;cursor:pointer;}
-button:hover{background:#ff006a;}
-</style>
-</head>
-<body>
-<div class="card">
-<h1>SQ BOOM Registration</h1>
-<input id="tid" placeholder="Telegram ID">
-<input id="uname" placeholder="Username">
-<input id="fname" placeholder="Full Name">
-<button onclick="register()">Register</button>
-<button onclick="info()">My Info</button>
-<div id="result"></div>
-</div>
-<script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbxyfXL5xIjEILkm12CuER_wW3PhWnsEY9wm_4jHid-ZRzQbhpm_OlDp1OT_K9xmeH7G/exec";
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot-Feed: Video Content</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Use Inter font and ensure full viewport height */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        html, body, #app {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Main container manages scrolling */
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+        }
 
-async function register(){
-  const d={action:"registerUser",
-           telegram_id:tid.value,username:uname.value,full_name:fname.value};
-  const r=await fetch(scriptURL,{method:"POST",body:JSON.stringify(d)});
-  const j=await r.json();result.innerText=j.ok?"✅ Registered":"❌ Error";
-}
-async function info(){
-  const d={action:"getUserInfo",telegram_id:tid.value};
-  const r=await fetch(scriptURL,{method:"POST",body:JSON.stringify(d)});
-  const j=await r.json();
-  result.innerHTML=j.ok?`👤 @${j.username}<br>💰 Balance ${j.balance} ETB<br>👥 Invites ${j.invites}`:"❌ User not found";
-}
-</script>
+        /* The core TikTok experience: Full-screen snap scrolling */
+        #video-feed-container {
+            scroll-snap-type: y mandatory;
+            height: 100vh;
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch; /* Better mobile scrolling */
+        }
+
+        .video-post {
+            height: 100vh;
+            scroll-snap-align: start;
+            min-width: 100%;
+            background-color: #111;
+            /* Hide default scrollbar on desktop for a cleaner look */
+            scrollbar-width: none;
+            -ms-overflow-style: none; 
+        }
+
+        .video-post::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-black text-white">
+
+    <div id="app" class="relative">
+        
+        <!-- Video Feed Container (Simulates the main scrollable area) -->
+        <div id="video-feed-container">
+            <!-- Videos will be injected here by JavaScript -->
+        </div>
+
+        <!-- Simulated Footer Navigation (Top Layer) -->
+        <div class="fixed bottom-0 left-0 right-0 h-16 bg-black/90 backdrop-blur-sm z-30 flex items-center justify-around border-t border-gray-800">
+            <button class="flex flex-col items-center text-red-500">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM6 10a1 1 0 001 1h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7a1 1 0 10-2 0v2H7a1 1 0 00-1 1z"/></svg>
+                <span class="text-xs mt-1">Home</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-400 hover:text-white transition">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"/></svg>
+                <span class="text-xs mt-1">Explore</span>
+            </button>
+            <button class="w-12 h-8 rounded-lg bg-red-600 flex items-center justify-center shadow-lg transform hover:scale-105 transition duration-200">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+            </button>
+            <button class="flex flex-col items-center text-gray-400 hover:text-white transition">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM6 10a1 1 0 101 1h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7a1 1 0 10-2 0v2H7a1 1 0 00-1 1z"/></svg>
+                <span class="text-xs mt-1">Inbox</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-400 hover:text-white transition">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+                <span class="text-xs mt-1">Profile</span>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // Global variables provided by the canvas environment for Firebase
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Mock video data
+        const videoData = [
+            { id: 1, user: '@BotCreator', caption: 'Welcome to the new video feed for our Telegram bot! Click the bot icon to connect.', color: 'red-600', likes: 1245 },
+            { id: 2, user: '@CryptoBotFan', caption: 'How I made $500 this week using the T-bot\'s trading signals!', color: 'emerald-600', likes: 8900 },
+            { id: 3, user: '@NewsFlash', caption: 'Breaking: New feature update rolling out now. Check the bot command list!', color: 'indigo-600', likes: 342 },
+            { id: 4, user: '@TechTips', caption: 'Pro-tip: Setup custom notifications for instant alerts 🔔.', color: 'yellow-600', likes: 5120 },
+            { id: 5, user: '@Community', caption: 'Show us your favorite bot command in the comments! 👇', color: 'pink-600', likes: 998 },
+            { id: 6, user: '@NewbieHelp', caption: 'FAQ video: Getting started with the T-bot in under 60 seconds.', color: 'cyan-600', likes: 2100 },
+        ];
+        
+        const feedContainer = document.getElementById('video-feed-container');
+        let currentPostIndex = 0;
+
+        // --- Core Functions ---
+
+        /**
+         * Generates the HTML string for a single video post, using a colored
+         * placeholder to simulate video content.
+         * @param {object} post - The video post data.
+         * @returns {string} The HTML for the post.
+         */
+        function createVideoPostHTML(post) {
+            // A simple video placeholder using a solid color/gradient
+            const videoPlaceholder = `
+                <div class="absolute inset-0 bg-gradient-to-br from-${post.color}-700 to-black opacity-80 flex items-center justify-center">
+                    <span class="text-2xl font-bold text-white/70">Video ${post.id} Content Here</span>
+                </div>
+            `;
+            
+            return `
+                <div id="post-${post.id}" class="video-post relative flex flex-col justify-end pb-16">
+                    ${videoPlaceholder}
+
+                    <!-- Video Overlay and Controls (Play/Pause indicator) -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div id="play-indicator-${post.id}" class="text-white text-6xl opacity-0 transition-opacity duration-300">
+                            ▶️
+                        </div>
+                    </div>
+
+                    <!-- Content & Actions Layer -->
+                    <div class="absolute inset-0 flex">
+                        <!-- Left Content Area (User Info, Caption, Music) -->
+                        <div class="flex-grow p-4 self-end space-y-3">
+                            <div class="text-sm font-semibold">${post.user}</div>
+                            <div class="text-sm">${post.caption}</div>
+                            <div class="flex items-center text-xs text-gray-300">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M18 3a2 2 0 00-2.3-2.3A2 2 0 0015 1H5a2 2 0 00-1.7.7A2 2 0 002 3v14a2 2 0 002 2h12a2 2 0 002-2V3zm-8 4v6l4-3-4-3z"/></svg>
+                                Original Sound - ${post.user}
+                            </div>
+                        </div>
+
+                        <!-- Right Action Bar -->
+                        <div class="w-16 flex flex-col items-center justify-end p-4 pb-20 space-y-6">
+                            
+                            <!-- Like Button -->
+                            <div class="flex flex-col items-center cursor-pointer transform hover:scale-110 transition duration-150">
+                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+                                <span class="text-xs font-semibold mt-1">${(post.likes / 1000).toFixed(1)}K</span>
+                            </div>
+
+                            <!-- Comment Button -->
+                            <div class="flex flex-col items-center cursor-pointer transform hover:scale-110 transition duration-150">
+                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.175A9.998 9.998 0 0110 3c4.418 0 8 3.134 8 7zm-8-2a1 1 0 00-1 1v2a1 1 0 102 0V9a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                <span class="text-xs font-semibold mt-1">${Math.floor(post.likes * 0.1)}</span>
+                            </div>
+
+                            <!-- Share Button -->
+                            <div class="flex flex-col items-center cursor-pointer transform hover:scale-110 transition duration-150">
+                                <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M15 8a3 3 0 10-2.977-2.705A6.002 6.002 0 0010 14a6.002 6.002 0 00-2.023-1.705 3 3 0 10-1.416 2.023A8.003 8.003 0 0110 18a8.003 8.003 0 017.324-4.372 3 3 0 00-2.416-5.45z"/></svg>
+                                <span class="text-xs font-semibold mt-1">Share</span>
+                            </div>
+                            
+                            <!-- Telegram Bot Button (The key element) -->
+                            <button onclick="connectToBot('${post.user}')" class="flex flex-col items-center cursor-pointer p-1 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg transform hover:scale-110 transition duration-150">
+                                <!-- Placeholder for Telegram Bot Icon -->
+                                <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M18 4l-16 6.5 6 2.5 5.5-4.5-4.5 5.5 2.5 6 6.5-16z"/></svg>
+                                <span class="sr-only">Connect Bot</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Debug: Display Post ID for verification -->
+                    <div class="absolute top-2 left-2 bg-black/50 text-xs px-2 py-1 rounded">Post #${post.id}</div>
+                </div>
+            `;
+        }
+        
+        /**
+         * Loads more mock video posts to simulate infinite scrolling.
+         * @param {number} count - Number of posts to load.
+         */
+        function loadMoreVideos(count = 3) {
+            for (let i = 0; i < count; i++) {
+                currentPostIndex++;
+                const originalPost = videoData[(currentPostIndex - 1) % videoData.length];
+                const newPost = {
+                    ...originalPost,
+                    id: currentPostIndex,
+                    likes: originalPost.likes + Math.floor(Math.random() * 500)
+                };
+                
+                const newPostDiv = document.createElement('div');
+                newPostDiv.innerHTML = createVideoPostHTML(newPost);
+                feedContainer.appendChild(newPostDiv.firstChild);
+            }
+            // Re-observe elements after adding new ones
+            setupIntersectionObserver();
+        }
+
+        // --- Interaction & Simulation Logic ---
+
+        /**
+         * Simulates video auto-play using IntersectionObserver.
+         * When a video post is fully visible, its "play" state is activated.
+         */
+        let observer;
+
+        function setupIntersectionObserver() {
+            // Disconnect old observer to prevent memory leaks/duplicate observations
+            if (observer) {
+                observer.disconnect();
+            }
+
+            // Options: Check if 90% of the element is visible
+            const options = {
+                root: feedContainer,
+                rootMargin: '0px',
+                threshold: 0.9
+            };
+
+            observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const postId = entry.target.id.split('-')[1];
+                    const playIndicator = document.getElementById(`play-indicator-${postId}`);
+                    
+                    if (entry.isIntersecting) {
+                        // Fully visible (simulated "playing")
+                        if (playIndicator) playIndicator.textContent = "⏸️"; // Show pause icon
+                        // console.log(`Post ${postId} is playing.`);
+                    } else {
+                        // Not visible (simulated "paused")
+                        if (playIndicator) playIndicator.textContent = "▶️"; // Show play icon
+                        // console.log(`Post ${postId} is paused.`);
+                    }
+                });
+            }, options);
+
+            // Observe all current video posts
+            document.querySelectorAll('.video-post').forEach(post => {
+                observer.observe(post);
+            });
+        }
+        
+        /**
+         * Handles the click on the Telegram Bot button.
+         * In a real application, this would redirect to the bot link.
+         */
+        function connectToBot(username) {
+            const messageBox = document.getElementById('app').querySelector('#message-box');
+            if (!messageBox) return;
+
+            messageBox.innerHTML = `
+                <div class="bg-blue-700 text-white p-4 rounded-lg shadow-xl max-w-sm w-full">
+                    <h3 class="font-bold text-lg mb-2">Bot Connection Initiated!</h3>
+                    <p class="text-sm">Pretending to open Telegram for user: <span class="font-mono bg-blue-800 px-1 rounded">${username}</span></p>
+                    <p class="text-sm mt-1">In a live environment, this would open the link to your Telegram bot (e.g., t.me/your_bot_name).</p>
+                    <button onclick="closeMessageBox()" class="mt-4 bg-white text-blue-700 font-semibold py-1 px-3 rounded-full hover:bg-gray-200 transition">Close</button>
+                </div>
+            `;
+            messageBox.classList.remove('hidden');
+        }
+
+        window.closeMessageBox = function() {
+            const messageBox = document.getElementById('app').querySelector('#message-box');
+            if (messageBox) messageBox.classList.add('hidden');
+        }
+
+        // --- Initialization ---
+
+        function init() {
+            // 1. Setup Firebase Auth (required by canvas environment, though not strictly used for video data here)
+            // This is crucial to ensure the app runs correctly in the environment.
+            if (firebaseConfig) {
+                // We'll skip the actual Firebase setup here to keep the demo simple and runnable, 
+                // but this is where you would initialize and sign in:
+                /*
+                import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+                import { getAuth, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                
+                if (initialAuthToken) {
+                    signInWithCustomToken(auth, initialAuthToken).catch(e => console.error("Auth Error:", e));
+                } else {
+                    signInAnonymously(auth).catch(e => console.error("Anon Auth Error:", e));
+                }
+                */
+               console.log("Firebase setup skipped for simplicity, but variables are available.");
+            }
+
+            // 2. Initial video load
+            loadMoreVideos(6); 
+            
+            // 3. Set up scroll listener for infinite loading simulation
+            feedContainer.addEventListener('scroll', () => {
+                const isNearBottom = feedContainer.scrollTop + feedContainer.clientHeight >= feedContainer.scrollHeight - 500;
+                if (isNearBottom) {
+                    loadMoreVideos(3);
+                }
+            });
+
+            // 4. Create a global message box for interactions (like the bot connect action)
+            const messageBox = document.createElement('div');
+            messageBox.id = 'message-box';
+            messageBox.className = 'hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4';
+            document.getElementById('app').appendChild(messageBox);
+        }
+
+        window.onload = init;
+    </script>
 </body>
 </html>
