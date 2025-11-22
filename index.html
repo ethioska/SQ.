@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>SQ BOOM | Tap to Earn</title>
+    <script>
+      // Polyfill process for browser environment to prevent crashes
+      window.process = window.process || {};
+      window.process.env = window.process.env || { API_KEY: '' };
+    </script>
+    <script>
+      // Tailwind config must be defined BEFORE the script loads
+      window.tailwind = {
+        config: {
+          darkMode: 'class',
+          theme: {
+            extend: {
+              colors: {
+                'main-bg': '#0A0E13',
+                'secondary-bg': '#121820',
+                'glass-bg': 'rgba(18, 24, 32, 0.6)',
+                'border-color': 'rgba(255, 255, 255, 0.1)',
+                'text-primary': '#E6EDF3',
+                'text-secondary': '#7D8590',
+                'accent-cyan': '#00BFFF',
+                'accent-magenta': '#FF00FF',
+                'accent-gold': '#FFD700',
+              },
+              fontFamily: {
+                'sans': ['Inter', 'sans-serif'],
+                'mono': ['"Courier New"', 'monospace'],
+              },
+               animation: {
+                  'pulse-glow': 'pulse-glow 4s infinite ease-in-out',
+                  'fly-up': 'fly-up 1.5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards',
+                  'fade-in': 'fade-in 0.3s ease-out forwards',
+                  'slide-up': 'slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+              },
+              keyframes: {
+                  'pulse-glow': {
+                      '0%, 100%': { transform: 'scale(1)', opacity: 0.8 },
+                      '50%': { transform: 'scale(1.02)', opacity: 1 },
+                  },
+                  'fly-up': {
+                      '0%': { transform: 'translate(-50%, -50%) scale(1.2)', opacity: 1 },
+                      '100%': { transform: 'translate(-50%, -350px) scale(0.5)', opacity: 0 },
+                  },
+                  'fade-in': {
+                      'from': { opacity: 0, transform: 'translateY(10px)' },
+                      'to': { opacity: 1, transform: 'translateY(0)' },
+                  },
+                  'slide-up': {
+                      'from': { transform: 'translateY(100%)' },
+                      'to': { transform: 'translateY(0)' },
+                  }
+              },
+            },
+          },
+        }
+      }
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^0.14.0/dist/index.js"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-main-bg text-text-primary overflow-hidden">
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
